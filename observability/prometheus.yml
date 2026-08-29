@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: recommendation-api
+    static_configs:
+      - targets: ["recommendation-api:8080"]
+  - job_name: feature-consumer
+    static_configs:
+      - targets: ["feature-consumer:8091"]

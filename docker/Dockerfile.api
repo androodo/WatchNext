@@ -1,0 +1,10 @@
+FROM golang:1.24-bookworm AS build
+WORKDIR /src
+COPY go.mod ./
+COPY . .
+RUN go mod tidy && go build -o /recommendation-api ./cmd/recommendation-api
+
+FROM gcr.io/distroless/base-debian12
+COPY --from=build /recommendation-api /recommendation-api
+EXPOSE 8080
+ENTRYPOINT ["/recommendation-api"]

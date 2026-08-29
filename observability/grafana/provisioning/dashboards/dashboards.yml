@@ -1,0 +1,7 @@
+apiVersion: 1
+providers:
+  - name: PulseRank
+    folder: PulseRank
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards
