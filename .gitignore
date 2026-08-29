@@ -1,0 +1,53 @@
+# Data (never commit MovieLens)
+data/raw/
+data/processed/
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Model artifacts (large)
+artifacts/
+!artifacts/.gitkeep
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Go
+bin/
+*.exe
+*.test
+*.out
+vendor/
+
+# Node
+web/node_modules/
+web/.next/
+web/out/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+
+# Env / secrets
+.env
+.env.local
+*.pem
+
+# Reports generated locally may be committed; keep placeholders
+reports/.cache/
+
+# Temp
+tmp/
+*.log
