@@ -1,21 +1,36 @@
 import type { ReactNode } from "react";
+import { Fraunces, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
-import Link from "next/link";
+import Nav from "@/components/Nav";
+import Providers from "./providers";
 
-export const metadata = { title: "PulseRank", description: "Real-time personalized recommendations" };
+const display = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const sans = Source_Sans_3({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+export const metadata = {
+  title: "Watch Next",
+  description: "What to watch next, from the movies you like",
+};
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${display.variable} ${sans.variable}`}>
       <body>
-        <nav className="nav">
-          <strong>PulseRank</strong>
-          <Link href="/">Feed</Link>
-          <Link href="/profile">Profile</Link>
-          <Link href="/debug">Debug</Link>
-          <Link href="/system">System</Link>
-        </nav>
-        {children}
+        <Providers>
+          <div className="app-shell">
+            <Nav />
+            {children}
+          </div>
+        </Providers>
       </body>
     </html>
   );
