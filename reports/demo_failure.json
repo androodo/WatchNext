@@ -1,0 +1,16 @@
+{
+  "before": {
+    "fallback_used": false,
+    "model_version": "ranker-v1"
+  },
+  "ml_down": {
+    "fallback_used": true,
+    "fallback_reason": "candidate_service_unavailable",
+    "recommendation_count": 5
+  },
+  "after": {
+    "fallback_used": false,
+    "model_version": "ranker-v1"
+  },
+  "note": "Measured locally by stopping the ML process on :8090 while the Go API stayed up. Responses remained HTTP 200."
+}

@@ -1,0 +1,49 @@
+{
+  "measured_at": "2026-08-29T11:24:19.505997+00:00",
+  "target": "http://localhost:8080",
+  "environment": {
+    "os": "Windows-11-10.0.26200-SP0",
+    "python": "3.13.1",
+    "cpu": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+    "machine": "AMD64"
+  },
+  "recommendation_api": [
+    {
+      "concurrency": 1,
+      "requests": 40,
+      "ok": 40,
+      "errors": 0,
+      "error_rate": 0.0,
+      "fallback_rate": 0.0,
+      "elapsed_s": 1.0834,
+      "rps": 36.92,
+      "p50_s": 0.0312,
+      "p95_s": 0.0349,
+      "p99_s": 0.0683,
+      "mean_s": 0.027
+    },
+    {
+      "concurrency": 10,
+      "requests": 40,
+      "ok": 40,
+      "errors": 0,
+      "error_rate": 0.0,
+      "fallback_rate": 0.0,
+      "elapsed_s": 0.3584,
+      "rps": 111.61,
+      "p50_s": 0.0831,
+      "p95_s": 0.109,
+      "p99_s": 0.1175,
+      "mean_s": 0.084
+    }
+  ],
+  "stream": {
+    "n_events": 200,
+    "publish_s": 5.2575,
+    "total_s": 11.0852,
+    "applied": 200,
+    "events_per_sec": 38.04,
+    "consume_events_per_sec": 18.04
+  },
+  "note": "Local-machine numbers. Not production scale."
+}

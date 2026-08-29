@@ -1,0 +1,8 @@
+{
+  "user_id": "1001",
+  "first_measured_run": {
+    "before": {"comedy": 0.2777, "sci_fi": 0.3087, "sci_fi_in_top10": 1},
+    "after": {"comedy": 0.2777, "sci_fi": 0.6391, "sci_fi_in_top10": 1}
+  },
+  "note": "Sci-fi affinity rose after likes. Top-10 sci-fi count stayed 1 because ALS candidates for this user are not sci-fi-heavy; ranking cannot invent items that were not retrieved."
+}
