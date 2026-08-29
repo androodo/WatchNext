@@ -3,9 +3,9 @@ requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pulserank-ml"
+name = "watchnext"
 version = "0.1.0"
-description = "PulseRank ML, feature engine, and stream consumer"
+description = "Watch Next ML, feature engine, and stream consumer"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115.0",
@@ -38,7 +38,7 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["pulserank_ml*"]
+include = ["watchnext*"]
 
 [tool.ruff]
 line-length = 120
@@ -52,7 +52,7 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 "simulation/*" = ["E402"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests", "pulserank_ml"]
+testpaths = ["tests", "watchnext"]
 asyncio_mode = "auto"
 filterwarnings = [
     "ignore::DeprecationWarning",

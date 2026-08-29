@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from pulserank_ml.common.schema import new_event
-from pulserank_ml.online.processor import FeatureProcessor, MemoryRedis
+from watchnext.common.schema import new_event
+from watchnext.online.processor import FeatureProcessor, MemoryRedis
 
 
 def test_duplicate_event_id_does_not_double_count():

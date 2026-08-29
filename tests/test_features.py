@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
-from pulserank_ml.common.schema import new_event
-from pulserank_ml.features.engine import FeatureEngine
+from watchnext.common.schema import new_event
+from watchnext.features.engine import FeatureEngine
 
 
 def test_event_validation_rejects_unknown_type():
@@ -56,3 +56,18 @@ def test_windowed_counts_respect_as_of():
     assert snap.likes_24h == 1
     assert snap.likes_7d == 1
     assert snap.interaction_count == 2
+
+
+def test_liked_items_persist_and_skip_removes_them():
+    eng = FeatureEngine()
+    t0 = datetime(2020, 1, 1, tzinfo=UTC)
+    like = new_event("u", "10", "like", timestamp=t0, event_id="l", metadata={"title": "Gladiator (2000)"})
+    state = eng.apply(like, ["action"])
+    assert state.liked_items == ["10"]
+    assert state.recent_actions[-1]["title"] == "Gladiator (2000)"
+    after = eng.apply(
+        new_event("u", "10", "skip", timestamp=t0 + timedelta(seconds=1), event_id="s"),
+        ["action"],
+    )
+    assert after.liked_items == []
+    assert "10" in after.disliked_items

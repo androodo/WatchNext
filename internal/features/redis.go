@@ -7,7 +7,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"pulserank/internal/recommendation"
+	"watchnext/internal/recommendation"
 )
 
 type Store struct {

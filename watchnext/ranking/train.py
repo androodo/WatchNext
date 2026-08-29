@@ -9,7 +9,7 @@ import lightgbm as lgb
 import numpy as np
 import orjson
 
-from pulserank_ml.features.names import RANKER_FEATURES
+from watchnext.features.names import RANKER_FEATURES
 
 
 def train_ranker(

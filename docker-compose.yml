@@ -1,4 +1,4 @@
-# PulseRank local stack
+# Watch Next local stack
 services:
   redis:
     image: redis:7-alpine
@@ -58,9 +58,9 @@ services:
       context: .
       dockerfile: docker/Dockerfile.ml
     environment:
-      PULSERANK_ROOT: /app
-      PULSERANK_ARTIFACTS: /app/artifacts
-      PULSERANK_PROCESSED: /app/data/processed
+      WATCHNEXT_ROOT: /app
+      WATCHNEXT_ARTIFACTS: /app/artifacts
+      WATCHNEXT_PROCESSED: /app/data/processed
     volumes:
       - ./artifacts:/app/artifacts
       - ./data:/app/data
@@ -77,7 +77,7 @@ services:
     environment:
       KAFKA_BROKERS: redpanda:9092
       REDIS_URL: redis://redis:6379/0
-      PULSERANK_ROOT: /app
+      WATCHNEXT_ROOT: /app
       METRICS_PORT: "8091"
     volumes:
       - ./data:/app/data

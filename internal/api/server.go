@@ -13,9 +13,9 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"pulserank/internal/config"
-	"pulserank/internal/events"
-	"pulserank/internal/recommendation"
+	"watchnext/internal/config"
+	"watchnext/internal/events"
+	"watchnext/internal/recommendation"
 )
 
 type Server struct {

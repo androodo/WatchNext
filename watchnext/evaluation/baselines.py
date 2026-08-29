@@ -7,7 +7,7 @@ from collections.abc import Sequence
 
 import polars as pl
 
-from pulserank_ml.common.constants import POSITIVE_EVENT_TYPES
+from watchnext.common.constants import POSITIVE_EVENT_TYPES
 
 
 def popularity_ranking(train: pl.DataFrame, k: int | None = None) -> list[str]:

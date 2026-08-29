@@ -1,4 +1,4 @@
-module pulserank
+module watchnext
 
 go 1.24.0
 

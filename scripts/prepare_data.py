@@ -9,8 +9,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from pulserank_ml.datasets.movielens import load_raw_movielens, to_canonical
-from pulserank_ml.datasets.split import temporal_split
+from watchnext.datasets.movielens import load_raw_movielens, to_canonical
+from watchnext.datasets.split import temporal_split
 
 RAW = ROOT / "data" / "raw"
 PROCESSED = ROOT / "data" / "processed"

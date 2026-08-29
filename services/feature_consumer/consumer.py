@@ -13,21 +13,21 @@ from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 from prometheus_client import Counter, Histogram, start_http_server
 from redis import Redis
 
-from pulserank_ml.online.processor import FeatureProcessor
+from watchnext.online.processor import FeatureProcessor
 
 log = structlog.get_logger("feature_consumer")
 
-EVENTS_PROCESSED = Counter("pulserank_events_processed_total", "Events processed", ["status"])
-INVALID = Counter("pulserank_invalid_events_total", "Invalid events")
-DUPES = Counter("pulserank_duplicate_events_total", "Duplicate event ids")
+EVENTS_PROCESSED = Counter("watchnext_events_processed_total", "Events processed", ["status"])
+INVALID = Counter("watchnext_invalid_events_total", "Invalid events")
+DUPES = Counter("watchnext_duplicate_events_total", "Duplicate event ids")
 FRESHNESS = Histogram(
-    "pulserank_feature_freshness_seconds",
+    "watchnext_feature_freshness_seconds",
     "event timestamp to feature update",
     buckets=(0.01, 0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10, 30, 60),
 )
 
-ROOT = Path(os.environ.get("PULSERANK_ROOT", Path(__file__).resolve().parents[2]))
-CAT_PATH = Path(os.environ.get("PULSERANK_ITEM_CATEGORIES", ROOT / "data" / "processed" / "item_categories.json"))
+ROOT = Path(os.environ.get("WATCHNEXT_ROOT", Path(__file__).resolve().parents[2]))
+CAT_PATH = Path(os.environ.get("WATCHNEXT_ITEM_CATEGORIES", ROOT / "data" / "processed" / "item_categories.json"))
 
 
 def load_categories() -> dict[str, list[str]]:
@@ -42,7 +42,7 @@ async def consume() -> None:
     redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
     topic = os.environ.get("INTERACTIONS_TOPIC", "events.interactions")
     dlq = os.environ.get("DLQ_TOPIC", "events.dead-letter")
-    group = os.environ.get("CONSUMER_GROUP", "pulserank-features")
+    group = os.environ.get("CONSUMER_GROUP", "watchnext-features")
     metrics_port = int(os.environ.get("METRICS_PORT", "8091"))
 
     start_http_server(metrics_port)

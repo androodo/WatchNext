@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"pulserank/internal/config"
-	"pulserank/internal/events"
-	"pulserank/internal/experiments"
+	"watchnext/internal/config"
+	"watchnext/internal/events"
+	"watchnext/internal/experiments"
 )
 
 type memStore struct {

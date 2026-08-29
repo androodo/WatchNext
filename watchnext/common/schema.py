@@ -8,7 +8,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field, field_validator
 
-from pulserank_ml.common.constants import EVENT_TYPES, EVENT_WEIGHTS, SCHEMA_VERSION
+from watchnext.common.constants import EVENT_TYPES, EVENT_WEIGHTS, SCHEMA_VERSION
 
 
 class InteractionEvent(BaseModel):

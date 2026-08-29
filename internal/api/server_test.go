@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"pulserank/internal/config"
-	"pulserank/internal/events"
-	"pulserank/internal/recommendation"
+	"watchnext/internal/config"
+	"watchnext/internal/events"
+	"watchnext/internal/recommendation"
 )
 
 type stubStore struct{}

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from pulserank_ml.candidates.als import ALSModel
-from pulserank_ml.candidates.popularity import popularity_candidates
-from pulserank_ml.common.constants import CANDIDATE_K
+from watchnext.candidates.als import ALSModel
+from watchnext.candidates.popularity import popularity_candidates
+from watchnext.common.constants import CANDIDATE_K
 
 
 def merge_candidates(

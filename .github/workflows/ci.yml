@@ -31,10 +31,10 @@ jobs:
       - name: install
         run: pip install -e ".[dev]"
       - name: ruff
-        run: ruff check pulserank_ml services scripts tests benchmarks
+        run: ruff check watchnext services scripts tests benchmarks
       - name: ruff format
-        run: ruff format --check pulserank_ml services scripts tests benchmarks
+        run: ruff format --check watchnext services scripts tests benchmarks
       - name: mypy
-        run: mypy pulserank_ml
+        run: mypy watchnext
       - name: pytest
         run: pytest -q

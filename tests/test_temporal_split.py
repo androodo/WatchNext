@@ -3,7 +3,7 @@ from __future__ import annotations
 import polars as pl
 import pytest
 
-from pulserank_ml.datasets.split import (
+from watchnext.datasets.split import (
     TemporalLeakageError,
     temporal_split,
     validate_temporal_split,

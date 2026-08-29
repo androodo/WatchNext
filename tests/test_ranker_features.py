@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
-from pulserank_ml.common.schema import new_event
-from pulserank_ml.features.engine import FeatureEngine
-from pulserank_ml.features.names import RANKER_FEATURES, feature_vector
-from pulserank_ml.ranking.dataset import build_ranker_features
+from watchnext.common.schema import new_event
+from watchnext.features.engine import FeatureEngine
+from watchnext.features.names import RANKER_FEATURES, feature_vector
+from watchnext.ranking.dataset import build_ranker_features
 
 
 def test_feature_vector_length_stable():

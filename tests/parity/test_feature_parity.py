@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
-from pulserank_ml.common.schema import new_event
-from pulserank_ml.features.engine import FeatureEngine
+from watchnext.common.schema import new_event
+from watchnext.features.engine import FeatureEngine
 
 
 def test_offline_replay_matches_online_incremental():

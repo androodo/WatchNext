@@ -1,6 +1,6 @@
 {
-  "title": "PulseRank",
-  "uid": "pulserank",
+  "title": "Watch Next",
+  "uid": "watchnext",
   "schemaVersion": 39,
   "version": 1,
   "panels": [
@@ -10,7 +10,7 @@
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(pulserank_request_latency_seconds_bucket[1m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(watchnext_request_latency_seconds_bucket[1m])) by (le))",
           "legendFormat": "p95"
         }
       ]
@@ -21,7 +21,7 @@
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
       "targets": [
         {
-          "expr": "sum(rate(pulserank_fallback_total[1m])) by (reason)",
+          "expr": "sum(rate(watchnext_fallback_total[1m])) by (reason)",
           "legendFormat": "{{reason}}"
         }
       ]
@@ -32,7 +32,7 @@
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(pulserank_feature_freshness_seconds_bucket[1m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(watchnext_feature_freshness_seconds_bucket[1m])) by (le))",
           "legendFormat": "p95 freshness"
         }
       ]
@@ -43,7 +43,7 @@
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
       "targets": [
         {
-          "expr": "sum(rate(pulserank_events_processed_total[1m])) by (status)",
+          "expr": "sum(rate(watchnext_events_processed_total[1m])) by (status)",
           "legendFormat": "{{status}}"
         }
       ]

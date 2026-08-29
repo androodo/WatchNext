@@ -11,13 +11,13 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"pulserank/internal/api"
-	"pulserank/internal/clients"
-	"pulserank/internal/config"
-	"pulserank/internal/events"
-	"pulserank/internal/features"
-	"pulserank/internal/recommendation"
-	"pulserank/internal/telemetry"
+	"watchnext/internal/api"
+	"watchnext/internal/clients"
+	"watchnext/internal/config"
+	"watchnext/internal/events"
+	"watchnext/internal/features"
+	"watchnext/internal/recommendation"
+	"watchnext/internal/telemetry"
 )
 
 func main() {

@@ -16,8 +16,8 @@ import json
 import polars as pl
 from redis import Redis
 
-from pulserank_ml.common.schema import new_event
-from pulserank_ml.online.processor import FeatureProcessor
+from watchnext.common.schema import new_event
+from watchnext.online.processor import FeatureProcessor
 
 PROCESSED = ROOT / "data" / "processed"
 

@@ -11,16 +11,18 @@ from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-from pulserank_ml.common.constants import (
+from watchnext.common.constants import (
     AFFINITY_ALPHA,
     HISTORY_CAP,
     NEGATIVE_EVENT_TYPES,
+    POSITIVE_EVENT_TYPES,
     WINDOW_7D_SECONDS,
     WINDOW_24H_SECONDS,
 )
-from pulserank_ml.common.schema import InteractionEvent
+from watchnext.common.schema import InteractionEvent
 
 COUNT_EVENT_TYPES = ("view", "like", "skip", "watch")
+RECENT_ACTIONS_CAP = 40
 
 
 def _ts(dt: datetime) -> float:
@@ -55,7 +57,9 @@ class UserFeatureState:
     last_activity_ts: float | None = None
     feature_updated_at: float | None = None
     disliked_items: list[str] = field(default_factory=list)
+    liked_items: list[str] = field(default_factory=list)
     interacted_items: list[str] = field(default_factory=list)
+    recent_actions: list[dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -67,7 +71,9 @@ class UserFeatureState:
         state = cls(**filtered)
         state.affinities = dict(state.affinities)
         state.disliked_items = list(state.disliked_items)
+        state.liked_items = list(state.liked_items)
         state.interacted_items = list(state.interacted_items)
+        state.recent_actions = [dict(row) for row in state.recent_actions]
         return state
 
     def affinity(self, category: str) -> float:
@@ -94,7 +100,9 @@ class FeatureEngine:
         interaction_count: int = 0,
         engagement_sum: float = 0.0,
         disliked_items: list[str] | None = None,
+        liked_items: list[str] | None = None,
         interacted_items: list[str] | None = None,
+        recent_actions: list[dict[str, Any]] | None = None,
         alpha: float = AFFINITY_ALPHA,
         history_cap: int = HISTORY_CAP,
     ) -> None:
@@ -103,9 +111,12 @@ class FeatureEngine:
         self.interaction_count = interaction_count
         self.engagement_sum = engagement_sum
         self._disliked: list[str] = list(disliked_items or [])
+        self._liked: list[str] = list(liked_items or [])
         self._interacted: list[str] = list(interacted_items or [])
+        self._recent: list[dict[str, Any]] = [dict(row) for row in (recent_actions or [])]
         self._interacted_set: set[str] = set(self._interacted)
         self._disliked_set: set[str] = set(self._disliked)
+        self._liked_set: set[str] = set(self._liked)
         self.alpha = alpha
         self.history_cap = history_cap
 
@@ -121,7 +132,9 @@ class FeatureEngine:
             interaction_count=state.interaction_count,
             engagement_sum=state.engagement_sum,
             disliked_items=state.disliked_items,
+            liked_items=state.liked_items,
             interacted_items=state.interacted_items,
+            recent_actions=state.recent_actions,
         )
 
     def apply(
@@ -148,9 +161,33 @@ class FeatureEngine:
             if event.item_id not in self._interacted_set:
                 self._interacted_set.add(event.item_id)
                 self._interacted.append(event.item_id)
-            if event.event_type in NEGATIVE_EVENT_TYPES and event.item_id not in self._disliked_set:
-                self._disliked_set.add(event.item_id)
-                self._disliked.append(event.item_id)
+            if event.event_type in POSITIVE_EVENT_TYPES:
+                if event.item_id in self._disliked_set:
+                    self._disliked_set.discard(event.item_id)
+                    self._disliked = [i for i in self._disliked if i != event.item_id]
+                if event.item_id not in self._liked_set:
+                    self._liked_set.add(event.item_id)
+                    self._liked.append(event.item_id)
+            if event.event_type in NEGATIVE_EVENT_TYPES:
+                if event.item_id in self._liked_set:
+                    self._liked_set.discard(event.item_id)
+                    self._liked = [i for i in self._liked if i != event.item_id]
+                if event.item_id not in self._disliked_set:
+                    self._disliked_set.add(event.item_id)
+                    self._disliked.append(event.item_id)
+            title = ""
+            if event.metadata:
+                title = str(event.metadata.get("title") or "")
+            self._recent.append(
+                {
+                    "event_type": event.event_type,
+                    "item_id": event.item_id,
+                    "title": title,
+                    "timestamp": rec.timestamp,
+                }
+            )
+            if len(self._recent) > RECENT_ACTIONS_CAP:
+                self._recent = self._recent[-RECENT_ACTIONS_CAP:]
             if abs(weight) > 0:
                 a = self.alpha
                 for cat in categories:
@@ -183,7 +220,9 @@ class FeatureEngine:
             last_activity_ts=last,
             feature_updated_at=as_of_ts,
             disliked_items=list(self._disliked),
+            liked_items=list(self._liked),
             interacted_items=list(self._interacted),
+            recent_actions=[dict(row) for row in self._recent],
         )
 
     def replay(

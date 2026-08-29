@@ -1,4 +1,4 @@
-from pulserank_ml.common.constants import (
+from watchnext.common.constants import (
     AFFINITY_ALPHA,
     CANDIDATE_K,
     DEFAULT_FEED_K,
@@ -6,7 +6,7 @@ from pulserank_ml.common.constants import (
     EVENT_WEIGHTS,
     SCHEMA_VERSION,
 )
-from pulserank_ml.common.schema import InteractionEvent, new_event, parse_event
+from watchnext.common.schema import InteractionEvent, new_event, parse_event
 
 __all__ = [
     "AFFINITY_ALPHA",

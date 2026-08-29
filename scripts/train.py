@@ -12,10 +12,10 @@ sys.path.insert(0, str(ROOT))
 
 import polars as pl
 
-from pulserank_ml.candidates.als import save_als, train_als
-from pulserank_ml.candidates.popularity import compute_popularity, save_popularity
-from pulserank_ml.ranking.dataset import build_training_lists
-from pulserank_ml.ranking.train import save_ranker, train_ranker
+from watchnext.candidates.als import save_als, train_als
+from watchnext.candidates.popularity import compute_popularity, save_popularity
+from watchnext.ranking.dataset import build_training_lists
+from watchnext.ranking.train import save_ranker, train_ranker
 
 PROCESSED = ROOT / "data" / "processed"
 ARTIFACTS = ROOT / "artifacts"

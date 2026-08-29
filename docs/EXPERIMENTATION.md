@@ -14,4 +14,4 @@ Responses and impression payloads include `experiment` and `model_version`.
 
 ## Shadow (optional)
 
-`SHADOW_ENABLED=true` runs the ranker asynchronously on **control** traffic and records top-K overlap in `pulserank_shadow_topk_overlap`. Shadow scores never replace the user-visible list.
+`SHADOW_ENABLED=true` runs the ranker asynchronously on **control** traffic and records top-K overlap in `watchnext_shadow_topk_overlap`. Shadow scores never replace the user-visible list.

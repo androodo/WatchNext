@@ -15,7 +15,7 @@ Candidates carry `item_id`, `source`, `retrieval_score`, `source_rank`.
 
 ## Ranker
 
-LightGBM `LGBMRanker` with `objective=lambdarank`. Features are listed in `pulserank_ml/features/names.py` (~21 fields). Online serving builds the same vector via `build_ranker_features`.
+LightGBM `LGBMRanker` with `objective=lambdarank`. Features are listed in `watchnext/features/names.py` (~21 fields). Online serving builds the same vector via `build_ranker_features`.
 
 ## Labels and negatives
 

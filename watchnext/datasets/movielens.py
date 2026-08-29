@@ -6,7 +6,7 @@ from pathlib import Path
 
 import polars as pl
 
-from pulserank_ml.common.schema import new_event
+from watchnext.common.schema import new_event
 
 RATING_TO_EVENT = {
     5: ("like", 1.0),

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pulserank_ml.evaluation.metrics import (
+from watchnext.evaluation.metrics import (
     catalog_coverage,
     hit_rate_at_k,
     mrr,

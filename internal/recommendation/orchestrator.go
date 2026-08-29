@@ -12,10 +12,10 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 
-	"pulserank/internal/config"
-	"pulserank/internal/events"
-	"pulserank/internal/experiments"
-	"pulserank/internal/telemetry"
+	"watchnext/internal/config"
+	"watchnext/internal/events"
+	"watchnext/internal/experiments"
+	"watchnext/internal/telemetry"
 )
 
 type CandidateSource interface {
@@ -94,9 +94,7 @@ func (o *Orchestrator) Recommend(ctx context.Context, userID string, limit int, 
 		o.fallback(result, "redis_unavailable")
 		feats = &UserFeatures{Affinities: map[string]float64{}}
 	}
-	if debug {
-		result.UserFeatures = feats
-	}
+	result.UserFeatures = feats
 
 	cands, candErr := o.lookupCandidates(ctx, userID, requestID, feats)
 	if candErr != nil || len(cands) == 0 {

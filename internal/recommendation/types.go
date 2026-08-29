@@ -17,7 +17,16 @@ type UserFeatures struct {
 	LastActivityTS   *float64           `json:"last_activity_ts"`
 	FeatureUpdatedAt *float64           `json:"feature_updated_at"`
 	DislikedItems    []string           `json:"disliked_items"`
+	LikedItems       []string           `json:"liked_items"`
 	InteractedItems  []string           `json:"interacted_items"`
+	RecentActions    []RecentAction     `json:"recent_actions"`
+}
+
+type RecentAction struct {
+	EventType string  `json:"event_type"`
+	ItemID    string  `json:"item_id"`
+	Title     string  `json:"title,omitempty"`
+	Timestamp float64 `json:"timestamp"`
 }
 
 type Candidate struct {

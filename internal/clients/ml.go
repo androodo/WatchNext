@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"pulserank/internal/recommendation"
+	"watchnext/internal/recommendation"
 )
 
 type MLClient struct {

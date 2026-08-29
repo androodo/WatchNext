@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import polars as pl
 
-from pulserank_ml.candidates.popularity import compute_popularity, popularity_candidates
-from pulserank_ml.candidates.retrieve import merge_candidates
-from pulserank_ml.evaluation.baselines import popularity_ranking, random_ranking
+from watchnext.candidates.popularity import compute_popularity, popularity_candidates
+from watchnext.candidates.retrieve import merge_candidates
+from watchnext.evaluation.baselines import popularity_ranking, random_ranking
 
 
 def test_popularity_orders_by_positives():

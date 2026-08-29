@@ -14,20 +14,20 @@ import structlog
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from pulserank_ml.candidates.als import ALSModel, load_als
-from pulserank_ml.candidates.popularity import load_popularity
-from pulserank_ml.candidates.retrieve import retrieve_for_user
-from pulserank_ml.common.constants import CANDIDATE_K
-from pulserank_ml.features.engine import UserFeatureState
-from pulserank_ml.features.names import feature_vector
-from pulserank_ml.ranking.dataset import build_ranker_features
-from pulserank_ml.ranking.train import load_ranker, predict_scores
+from watchnext.candidates.als import ALSModel, load_als
+from watchnext.candidates.popularity import load_popularity
+from watchnext.candidates.retrieve import retrieve_for_user
+from watchnext.common.constants import CANDIDATE_K
+from watchnext.features.engine import UserFeatureState
+from watchnext.features.names import feature_vector
+from watchnext.ranking.dataset import build_ranker_features
+from watchnext.ranking.train import load_ranker, predict_scores
 
 log = structlog.get_logger("ml_service")
 
-ROOT = Path(os.environ.get("PULSERANK_ROOT", Path(__file__).resolve().parents[2]))
-ARTIFACTS = Path(os.environ.get("PULSERANK_ARTIFACTS", ROOT / "artifacts"))
-PROCESSED = Path(os.environ.get("PULSERANK_PROCESSED", ROOT / "data" / "processed"))
+ROOT = Path(os.environ.get("WATCHNEXT_ROOT", Path(__file__).resolve().parents[2]))
+ARTIFACTS = Path(os.environ.get("WATCHNEXT_ARTIFACTS", ROOT / "artifacts"))
+PROCESSED = Path(os.environ.get("WATCHNEXT_PROCESSED", ROOT / "data" / "processed"))
 
 
 class AppState:
@@ -95,7 +95,7 @@ async def lifespan(_app: FastAPI):
     yield
 
 
-app = FastAPI(title="PulseRank ML Service", lifespan=lifespan)
+app = FastAPI(title="Watch Next ML Service", lifespan=lifespan)
 
 
 class CandidateRequest(BaseModel):

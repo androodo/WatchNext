@@ -9,7 +9,7 @@ import (
 )
 
 func Tracer() trace.Tracer {
-	return otel.Tracer("pulserank")
+	return otel.Tracer("watchnext")
 }
 
 func Logger(service string) *slog.Logger {

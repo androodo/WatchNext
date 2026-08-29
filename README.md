@@ -1,6 +1,6 @@
-# PulseRank
+# Watch Next
 
-Real-time personalized recommendations. User interactions stream through Kafka-compatible Redpanda, update online features in Redis, and immediately change the next ranking from a two-stage retrieval + ranker.
+What to watch next, from the movies you just liked or skipped. Likes and skips stream through Kafka-compatible Redpanda, update online features in Redis, and immediately change the next ranking from a two-stage retrieval + ranker.
 
 **UI:** [http://localhost:3000](http://localhost:3000) · **API:** `GET /v1/recommendations/{user_id}`
 
@@ -91,6 +91,6 @@ Makefile: `setup`, `download-data`, `prepare-data`, `train`, `evaluate`, `up`, `
 | `internal/` | Orchestration, experiments, events, telemetry |
 | `services/ml_service` | Candidate retrieval + ranking |
 | `services/feature_consumer` | Stream → Redis features |
-| `pulserank_ml/` | Data, features, ALS, ranker, metrics |
+| `watchnext/` | Data, features, ALS, ranker, metrics |
 | `web/` | Next.js UI |
 | `tests/parity/` | Offline / online feature equality |

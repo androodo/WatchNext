@@ -34,14 +34,14 @@ test:
 	$(GO) test -race ./...
 
 lint:
-	$(PYTHON) -m ruff check pulserank_ml services scripts tests benchmarks
-	$(PYTHON) -m ruff format --check pulserank_ml services scripts tests benchmarks
-	$(PYTHON) -m mypy pulserank_ml
+	$(PYTHON) -m ruff check watchnext services scripts tests benchmarks
+	$(PYTHON) -m ruff format --check watchnext services scripts tests benchmarks
+	$(PYTHON) -m mypy watchnext
 	$(GO) vet ./...
 	$(GO) fmt ./...
 
 fmt:
-	$(PYTHON) -m ruff format pulserank_ml services scripts tests benchmarks
+	$(PYTHON) -m ruff format watchnext services scripts tests benchmarks
 	$(GO) fmt ./...
 
 demo:

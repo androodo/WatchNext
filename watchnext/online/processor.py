@@ -7,9 +7,9 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any, Protocol
 
-from pulserank_ml.common.constants import DEDUPE_TTL_SECONDS
-from pulserank_ml.common.schema import InteractionEvent, parse_event
-from pulserank_ml.features.engine import FeatureEngine, HistoryRecord, UserFeatureState
+from watchnext.common.constants import DEDUPE_TTL_SECONDS
+from watchnext.common.schema import InteractionEvent, parse_event
+from watchnext.features.engine import FeatureEngine, HistoryRecord, UserFeatureState
 
 
 class RedisLike(Protocol):
@@ -81,7 +81,9 @@ class FeatureProcessor:
         interaction_count = 0
         engagement_sum = 0.0
         disliked: list[str] = []
+        liked: list[str] = []
         interacted: list[str] = []
+        recent: list[dict[str, Any]] = []
         if raw_feat:
             data = json.loads(raw_feat)
             state0 = UserFeatureState.from_dict(data)
@@ -89,7 +91,9 @@ class FeatureProcessor:
             interaction_count = state0.interaction_count
             engagement_sum = state0.engagement_sum
             disliked = state0.disliked_items
+            liked = state0.liked_items
             interacted = state0.interacted_items
+            recent = state0.recent_actions
         if raw_hist:
             history = FeatureEngine.history_from_docs(json.loads(raw_hist))
         engine = FeatureEngine(
@@ -98,7 +102,9 @@ class FeatureProcessor:
             interaction_count=interaction_count,
             engagement_sum=engagement_sum,
             disliked_items=disliked,
+            liked_items=liked,
             interacted_items=interacted,
+            recent_actions=recent,
         )
         cats = self.item_categories.get(str(event.item_id), [])
         state = engine.apply(event, cats, now=now)

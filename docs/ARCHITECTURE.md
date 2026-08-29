@@ -1,6 +1,6 @@
 # Architecture
 
-PulseRank is a small real-time recommendation platform, not a clone of a production feed at Google-scale.
+Watch Next is a small real-time recommendation platform, not a clone of a production feed at Google-scale.
 
 ```mermaid
 flowchart TD

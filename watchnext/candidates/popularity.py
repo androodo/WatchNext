@@ -8,7 +8,7 @@ from typing import Any
 import orjson
 import polars as pl
 
-from pulserank_ml.common.constants import CANDIDATE_K, POSITIVE_EVENT_TYPES
+from watchnext.common.constants import CANDIDATE_K, POSITIVE_EVENT_TYPES
 
 
 def compute_popularity(train: pl.DataFrame) -> pl.DataFrame:

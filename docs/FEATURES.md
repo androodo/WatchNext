@@ -1,6 +1,6 @@
 # Features
 
-One engine: `pulserank_ml/features/engine.py`.
+One engine: `watchnext/features/engine.py`.
 
 The feature consumer, offline ranker dataset, and parity tests all call it. Do not reimplement `sci_fi` affinity in Go or in a notebook.
 

@@ -9,7 +9,7 @@ import numpy as np
 import orjson
 from scipy import sparse
 
-from pulserank_ml.common.constants import CANDIDATE_K, POSITIVE_EVENT_TYPES
+from watchnext.common.constants import CANDIDATE_K, POSITIVE_EVENT_TYPES
 
 try:
     from implicit.als import AlternatingLeastSquares

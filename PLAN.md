@@ -1,10 +1,9 @@
-# PulseRank — Project Plan
+# Watch Next — Project Plan
 
 Real-time personalized recommendation platform.
 
-One sentence: user interactions stream through Kafka-compatible Redpanda, update
-online features in Redis, and change recommendations served by a two-stage
-retrieval + ranking system.
+One sentence: like or skip a movie, and the next recommendations change immediately
+via Redpanda, Redis, and a two-stage retrieval + ranker.
 
 ---
 
@@ -64,7 +63,7 @@ Four runtime pieces. Not a microservice zoo.
 
 Infrastructure: Redis, Redpanda, Prometheus, Grafana.
 
-Offline training is batch Python (`pulserank_ml` + `scripts/`). It is not a service.
+Offline training is batch Python (`watchnext` + `scripts/`). It is not a service.
 
 ### Recommendation request lifecycle
 
@@ -92,7 +91,7 @@ GET /v1/recommendations/{user_id}?limit=10
 
 ### Feature semantics (shared)
 
-One engine: `pulserank_ml/features/engine.py`.
+One engine: `watchnext/features/engine.py`.
 
 Used by:
 

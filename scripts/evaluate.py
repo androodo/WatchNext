@@ -14,16 +14,16 @@ sys.path.insert(0, str(ROOT))
 
 import polars as pl
 
-from pulserank_ml.candidates.als import load_als
-from pulserank_ml.candidates.popularity import (
+from watchnext.candidates.als import load_als
+from watchnext.candidates.popularity import (
     compute_popularity,
     load_popularity,
     popularity_candidates,
 )
-from pulserank_ml.candidates.retrieve import retrieve_for_user
-from pulserank_ml.common.constants import POSITIVE_EVENT_TYPES
-from pulserank_ml.evaluation.baselines import popularity_ranking, random_ranking
-from pulserank_ml.evaluation.metrics import (
+from watchnext.candidates.retrieve import retrieve_for_user
+from watchnext.common.constants import POSITIVE_EVENT_TYPES
+from watchnext.evaluation.baselines import popularity_ranking, random_ranking
+from watchnext.evaluation.metrics import (
     catalog_coverage,
     hit_rate_at_k,
     mean_metric,
@@ -32,11 +32,11 @@ from pulserank_ml.evaluation.metrics import (
     precision_at_k,
     recall_at_k,
 )
-from pulserank_ml.evaluation.report import write_evaluation_report
-from pulserank_ml.features.engine import FeatureEngine
-from pulserank_ml.features.names import feature_vector
-from pulserank_ml.ranking.dataset import build_ranker_features
-from pulserank_ml.ranking.train import load_ranker, predict_scores
+from watchnext.evaluation.report import write_evaluation_report
+from watchnext.features.engine import FeatureEngine
+from watchnext.features.names import feature_vector
+from watchnext.ranking.dataset import build_ranker_features
+from watchnext.ranking.train import load_ranker, predict_scores
 
 PROCESSED = ROOT / "data" / "processed"
 ARTIFACTS = ROOT / "artifacts"
@@ -121,7 +121,7 @@ def main() -> None:
     for row in train_by_user.iter_rows(named=True):
         uid = str(row["user_id"])
         iid = str(row["item_id"])
-        from pulserank_ml.common.schema import new_event
+        from watchnext.common.schema import new_event
 
         ev = new_event(
             user_id=uid,

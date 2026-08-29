@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import polars as pl
 
-from pulserank_ml.candidates.als import train_als
-from pulserank_ml.ranking.dataset import build_training_lists
-from pulserank_ml.ranking.train import predict_scores, train_ranker
+from watchnext.candidates.als import train_als
+from watchnext.ranking.dataset import build_training_lists
+from watchnext.ranking.train import predict_scores, train_ranker
 
 
 def _tiny_train() -> tuple[pl.DataFrame, pl.DataFrame]:

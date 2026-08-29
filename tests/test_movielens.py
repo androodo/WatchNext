@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pulserank_ml.datasets.movielens import RATING_TO_EVENT, parse_year
+from watchnext.datasets.movielens import RATING_TO_EVENT, parse_year
 
 
 def test_rating_mapping():

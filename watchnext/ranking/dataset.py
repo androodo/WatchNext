@@ -8,14 +8,14 @@ from typing import Any
 
 import polars as pl
 
-from pulserank_ml.common.constants import (
+from watchnext.common.constants import (
     POSITIVE_EVENT_TYPES,
     RANKER_MAX_POSITIVES_PER_USER,
     RANKER_NEGATIVES_PER_POSITIVE,
 )
-from pulserank_ml.common.schema import new_event
-from pulserank_ml.features.engine import FeatureEngine
-from pulserank_ml.features.names import RANKER_FEATURES, feature_vector
+from watchnext.common.schema import new_event
+from watchnext.features.engine import FeatureEngine
+from watchnext.features.names import RANKER_FEATURES, feature_vector
 
 # Negative sampling strategy (documented, not "true dislikes"):
 # For each positive interaction at time t we sample items the user had not
