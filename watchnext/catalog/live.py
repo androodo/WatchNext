@@ -31,7 +31,9 @@ def live_score(
     affinities: dict[str, float] | None,
     now_year: int | None = None,
 ) -> float:
-    return 0.45 * row.popularity + 0.40 * recency_boost(row.year, now_year) + 0.15 * _affinity(row.categories, affinities)
+    recency = recency_boost(row.year, now_year)
+    affinity = _affinity(row.categories, affinities)
+    return 0.45 * row.popularity + 0.40 * recency + 0.15 * affinity
 
 
 def blend_live_catalog(

@@ -4,11 +4,11 @@ from pathlib import Path
 
 import polars as pl
 
-from watchnext.catalog.imdb import build_imdb_frame, merge_imdb_into_items
-from watchnext.catalog.wikidata import rows_from_bindings
-from watchnext.catalog.live import blend_live_catalog, recency_boost
 from watchnext.catalog.browse import CatalogRow
+from watchnext.catalog.imdb import build_imdb_frame, merge_imdb_into_items
+from watchnext.catalog.live import blend_live_catalog, recency_boost
 from watchnext.catalog.titles import canonical_title, display_title
+from watchnext.catalog.wikidata import rows_from_bindings
 
 
 def test_wikidata_bindings_dedupe_and_keep_tt_ids():

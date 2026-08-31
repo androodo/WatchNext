@@ -5,7 +5,6 @@ from watchnext.catalog.browse import (
     canonicalize_genres,
     fill_by_genre,
     genres_with_counts,
-    normalize_genre,
     search_catalog,
 )
 

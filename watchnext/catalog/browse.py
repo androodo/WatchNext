@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date
-from typing import Any, Iterable
+from typing import Any
 
 from watchnext.catalog.titles import canonical_title, compact_title
 
@@ -115,18 +116,13 @@ def _matches(row: CatalogRow, query: str, genre: str) -> bool:
     if compact_q and compact_q in compact_title(row.title):
         return True
     canon_q = canonical_title(query)
-    if canon_q and canon_q in canonical_title(row.title):
-        return True
-    return False
+    return bool(canon_q and canon_q in canonical_title(row.title))
 
 
 def newest_score(row: CatalogRow, now_year: int | None = None) -> float:
     """Newest first, but unknown new titles do not bury movies people actually know."""
     now = now_year or date.today().year
-    if row.year is None:
-        recency = 0.0
-    else:
-        recency = 0.90 ** max(0, now - int(row.year))
+    recency = 0.0 if row.year is None else 0.9 ** max(0, now - int(row.year))
     return 0.40 * recency + 0.60 * row.popularity
 
 

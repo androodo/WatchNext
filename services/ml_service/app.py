@@ -18,7 +18,6 @@ from pydantic import BaseModel, Field
 from watchnext.candidates.als import ALSModel, load_als
 from watchnext.candidates.popularity import load_popularity
 from watchnext.candidates.retrieve import retrieve_for_user
-from watchnext.catalog.categories import load_item_categories
 from watchnext.catalog.browse import (
     CatalogRow,
     build_catalog,
@@ -27,12 +26,13 @@ from watchnext.catalog.browse import (
     normalize_genre,
     search_catalog,
 )
+from watchnext.catalog.categories import load_item_categories
 from watchnext.catalog.imdb import load_imdb_parquet, merge_imdb_into_items, refresh_imdb_parquet
 from watchnext.catalog.live import blend_live_catalog, recency_boost
 from watchnext.common.constants import CANDIDATE_K, MAX_CANDIDATE_K
 from watchnext.features.engine import UserFeatureState
-from watchnext.online.processor import FeatureProcessor
 from watchnext.features.names import feature_vector
+from watchnext.online.processor import FeatureProcessor
 from watchnext.ranking.dataset import build_ranker_features
 from watchnext.ranking.train import load_ranker, predict_scores
 

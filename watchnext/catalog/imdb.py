@@ -10,7 +10,7 @@ from typing import Any
 
 import polars as pl
 
-from watchnext.catalog.browse import normalize_genre, canonicalize_genres
+from watchnext.catalog.browse import canonicalize_genres
 from watchnext.catalog.titles import canonical_title, display_title
 from watchnext.catalog.wikidata import fetch_wikidata_movies
 
@@ -87,7 +87,9 @@ def build_imdb_frame(
         .filter(pl.col("year") <= now_year)
         .filter(pl.col("year") >= 1915)
         .filter(pl.col("votes").is_not_null())
-        .filter((pl.col("votes") >= min_votes) | ((pl.col("year") >= recent_from) & (pl.col("votes") >= recent_min_votes)))
+        .filter(
+            (pl.col("votes") >= min_votes) | ((pl.col("year") >= recent_from) & (pl.col("votes") >= recent_min_votes))
+        )
         .select("tconst", "primaryTitle", "year", "genres", "votes", "rating")
         .collect()
     )
