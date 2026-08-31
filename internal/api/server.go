@@ -18,12 +18,20 @@ import (
 	"watchnext/internal/recommendation"
 )
 
+type CatalogClient interface {
+	Catalog(ctx context.Context, q, genre, sort string, limit, offset, yearMin, yearMax int) (*recommendation.CatalogPage, error)
+	Item(ctx context.Context, itemID string) (*recommendation.CatalogItem, error)
+	Genres(ctx context.Context) (*recommendation.GenreCatalog, error)
+	RefreshCatalog(ctx context.Context) (*recommendation.GenreCatalog, error)
+}
+
 type Server struct {
-	Cfg    config.Config
-	Orch   *recommendation.Orchestrator
-	Log    *slog.Logger
-	Ready  func(context.Context) error
-	Health func() error
+	Cfg     config.Config
+	Orch    *recommendation.Orchestrator
+	Catalog CatalogClient
+	Log     *slog.Logger
+	Ready   func(context.Context) error
+	Health  func() error
 }
 
 func NewServer(cfg config.Config, orch *recommendation.Orchestrator, log *slog.Logger) *Server {
@@ -38,6 +46,10 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/recommendations/{user_id}", s.recommend)
 	mux.HandleFunc("GET /v1/recommendations/{user_id}/debug", s.debug)
 	mux.HandleFunc("GET /v1/users/{user_id}/features", s.features)
+	mux.HandleFunc("GET /v1/catalog", s.catalog)
+	mux.HandleFunc("GET /v1/items/{item_id}", s.item)
+	mux.HandleFunc("GET /v1/genres", s.genres)
+	mux.HandleFunc("POST /v1/catalog/refresh", s.refreshCatalog)
 	mux.HandleFunc("POST /v1/events", s.postEvent)
 	mux.HandleFunc("OPTIONS /v1/", s.cors)
 	mux.HandleFunc("OPTIONS /v1/events", s.cors)
@@ -103,20 +115,110 @@ func (s *Server) serveRec(w http.ResponseWriter, r *http.Request, debug bool) {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "user_id required"})
 		return
 	}
-	limit := 10
+	limit := 36
 	if raw := r.URL.Query().Get("limit"); raw != "" {
 		if n, err := strconv.Atoi(raw); err == nil {
 			limit = n
 		}
 	}
+	genre := r.URL.Query().Get("genre")
 	ctx, cancel := context.WithTimeout(r.Context(), s.Cfg.RequestTimeout)
 	defer cancel()
-	res, err := s.Orch.Recommend(ctx, userID, limit, debug)
+	res, err := s.Orch.Recommend(ctx, userID, limit, debug, genre)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
 	writeJSON(w, http.StatusOK, res)
+}
+
+func (s *Server) catalog(w http.ResponseWriter, r *http.Request) {
+	if s.Catalog == nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "catalog_unavailable"})
+		return
+	}
+	q := r.URL.Query()
+	limit := 48
+	if raw := q.Get("limit"); raw != "" {
+		if n, err := strconv.Atoi(raw); err == nil {
+			limit = n
+		}
+	}
+	offset := 0
+	if raw := q.Get("offset"); raw != "" {
+		if n, err := strconv.Atoi(raw); err == nil {
+			offset = n
+		}
+	}
+	yearMin, yearMax := 0, 0
+	if raw := q.Get("year_min"); raw != "" {
+		if n, err := strconv.Atoi(raw); err == nil {
+			yearMin = n
+		}
+	}
+	if raw := q.Get("year_max"); raw != "" {
+		if n, err := strconv.Atoi(raw); err == nil {
+			yearMax = n
+		}
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), s.Cfg.CandidateTimeout)
+	defer cancel()
+	page, err := s.Catalog.Catalog(ctx, q.Get("q"), q.Get("genre"), q.Get("sort"), limit, offset, yearMin, yearMax)
+	if err != nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "catalog_unavailable"})
+		return
+	}
+	writeJSON(w, http.StatusOK, page)
+}
+
+func (s *Server) item(w http.ResponseWriter, r *http.Request) {
+	if s.Catalog == nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "catalog_unavailable"})
+		return
+	}
+	itemID := r.PathValue("item_id")
+	if itemID == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "item_id required"})
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), s.Cfg.CandidateTimeout)
+	defer cancel()
+	item, err := s.Catalog.Item(ctx, itemID)
+	if err != nil {
+		writeJSON(w, http.StatusNotFound, map[string]string{"error": "unknown_item"})
+		return
+	}
+	writeJSON(w, http.StatusOK, item)
+}
+
+func (s *Server) genres(w http.ResponseWriter, r *http.Request) {
+	if s.Catalog == nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "catalog_unavailable"})
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), s.Cfg.CandidateTimeout)
+	defer cancel()
+	page, err := s.Catalog.Genres(ctx)
+	if err != nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "catalog_unavailable"})
+		return
+	}
+	writeJSON(w, http.StatusOK, page)
+}
+
+func (s *Server) refreshCatalog(w http.ResponseWriter, r *http.Request) {
+	if s.Catalog == nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "catalog_unavailable"})
+		return
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Minute)
+	defer cancel()
+	page, err := s.Catalog.RefreshCatalog(ctx)
+	if err != nil {
+		writeJSON(w, http.StatusBadGateway, map[string]string{"error": "catalog_refresh_failed"})
+		return
+	}
+	writeJSON(w, http.StatusOK, page)
 }
 
 func (s *Server) features(w http.ResponseWriter, r *http.Request) {

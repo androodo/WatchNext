@@ -22,6 +22,7 @@ type Config struct {
 	RankerTimeout     time.Duration
 	KafkaTimeout      time.Duration
 	RequestTimeout    time.Duration
+	InlineFeatures    bool
 }
 
 func getenv(key, fallback string) string {
@@ -40,9 +41,13 @@ func Load() Config {
 		}
 		return time.Duration(n) * time.Millisecond
 	}
+	addr := getenv("HTTP_ADDR", "")
+	if addr == "" {
+		addr = ":" + getenv("PORT", "8080")
+	}
 	brokers := strings.Split(getenv("KAFKA_BROKERS", "localhost:19092"), ",")
 	return Config{
-		Addr:              getenv("HTTP_ADDR", ":8080"),
+		Addr:              addr,
 		RedisURL:          getenv("REDIS_URL", "redis://localhost:6379/0"),
 		KafkaBrokers:      brokers,
 		MLBaseURL:         getenv("ML_BASE_URL", "http://localhost:8090"),
@@ -56,5 +61,6 @@ func Load() Config {
 		RankerTimeout:     ms("RANKER_TIMEOUT_MS", 1500),
 		KafkaTimeout:      ms("KAFKA_TIMEOUT_MS", 400),
 		RequestTimeout:    ms("REQUEST_TIMEOUT_MS", 2500),
+		InlineFeatures:    getenv("INLINE_FEATURES", "false") == "true",
 	}
 }

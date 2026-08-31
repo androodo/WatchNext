@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { parseMovieTitle } from "@/lib/titles";
 
-type PosterInfo = { url: string | null; extract: string | null };
+type PosterInfo = { url: string | null; extract: string | null; wikiTitle: string | null };
 
 const memory = new Map<string, PosterInfo>();
 
@@ -23,14 +23,14 @@ export function usePoster(title?: string) {
     let cancelled = false;
     setFailed(false);
     fetch(`/api/poster?title=${encodeURIComponent(key)}`)
-      .then((res) => (res.ok ? res.json() : { url: null, extract: null }))
+      .then((res) => (res.ok ? res.json() : { url: null, extract: null, wikiTitle: null }))
       .then((data: PosterInfo) => {
         if (cancelled) return;
         memory.set(key, data);
         setInfo(data);
       })
       .catch(() => {
-        if (!cancelled) setInfo({ url: null, extract: null });
+        if (!cancelled) setInfo({ url: null, extract: null, wikiTitle: null });
       });
     return () => {
       cancelled = true;
@@ -49,9 +49,10 @@ function hashHue(title: string): number {
 type PosterProps = {
   title?: string;
   className?: string;
+  hideFallbackTitle?: boolean;
 };
 
-export default function Poster({ title, className }: PosterProps) {
+export default function Poster({ title, className, hideFallbackTitle }: PosterProps) {
   const parsed = parseMovieTitle(title);
   const { url, failed, setFailed, loading } = usePoster(title);
   const hue = hashHue(parsed.display);
@@ -66,7 +67,9 @@ export default function Poster({ title, className }: PosterProps) {
         // Wikimedia posters; referrerPolicy avoids hotlink blocks.
         // eslint-disable-next-line @next/next/no-img-element
         <img src={url!} alt={parsed.display} referrerPolicy="no-referrer" onError={() => setFailed(true)} />
-      ) : loading ? null : (
+      ) : loading ? null : hideFallbackTitle ? (
+        <div className="poster-fallback poster-fallback-quiet" aria-hidden="true" />
+      ) : (
         <div className="poster-fallback">
           <span className="poster-kicker">{parsed.year || "Film"}</span>
           <span className="poster-title">{parsed.display}</span>

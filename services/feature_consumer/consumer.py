@@ -13,6 +13,7 @@ from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 from prometheus_client import Counter, Histogram, start_http_server
 from redis import Redis
 
+from watchnext.catalog.categories import load_item_categories
 from watchnext.online.processor import FeatureProcessor
 
 log = structlog.get_logger("feature_consumer")
@@ -27,14 +28,34 @@ FRESHNESS = Histogram(
 )
 
 ROOT = Path(os.environ.get("WATCHNEXT_ROOT", Path(__file__).resolve().parents[2]))
-CAT_PATH = Path(os.environ.get("WATCHNEXT_ITEM_CATEGORIES", ROOT / "data" / "processed" / "item_categories.json"))
 
 
 def load_categories() -> dict[str, list[str]]:
-    if not CAT_PATH.exists():
-        log.warning("item_categories_missing", path=str(CAT_PATH))
-        return {}
-    return json.loads(CAT_PATH.read_text(encoding="utf-8"))
+    cats = load_item_categories(ROOT)
+    if not cats:
+        log.warning("item_categories_empty", root=str(ROOT))
+    else:
+        live = sum(1 for key in cats if str(key).startswith("tt"))
+        log.info("item_categories_loaded", n=len(cats), live=live)
+    return cats
+
+
+def backfill_empty_affinities(redis: Redis, processor: FeatureProcessor) -> int:
+    n = 0
+    try:
+        keys = redis.scan_iter(match="user:*:features", count=200)
+    except Exception as exc:
+        log.warning("affinity_backfill_scan_failed", error=str(exc))
+        return 0
+    for key in keys:
+        try:
+            if processor.backfill_user_affinities(str(key)):
+                n += 1
+        except Exception as exc:
+            log.warning("affinity_backfill_user_failed", key=str(key), error=str(exc))
+    if n:
+        log.info("affinity_backfill_done", users=n)
+    return n
 
 
 async def consume() -> None:
@@ -49,6 +70,7 @@ async def consume() -> None:
     categories = load_categories()
     r = Redis.from_url(redis_url, decode_responses=True)
     processor = FeatureProcessor(r, categories)  # sync client: get/set match RedisLike
+    backfill_empty_affinities(r, processor)
 
     consumer = AIOKafkaConsumer(
         topic,

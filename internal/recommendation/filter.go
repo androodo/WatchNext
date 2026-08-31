@@ -1,6 +1,43 @@
 package recommendation
 
-import "sort"
+import (
+	"sort"
+	"strings"
+)
+
+func NormalizeGenre(raw string) string {
+	s := strings.ToLower(strings.TrimSpace(raw))
+	s = strings.ReplaceAll(s, " ", "_")
+	s = strings.ReplaceAll(s, "-", "_")
+	s = strings.ReplaceAll(s, "'", "")
+	return s
+}
+
+func HasGenre(cats []string, genre string) bool {
+	want := NormalizeGenre(genre)
+	if want == "" {
+		return true
+	}
+	for _, c := range cats {
+		if NormalizeGenre(c) == want {
+			return true
+		}
+	}
+	return false
+}
+
+func FilterByGenre(items []RankedItem, genre string) []RankedItem {
+	if NormalizeGenre(genre) == "" {
+		return items
+	}
+	out := make([]RankedItem, 0, len(items))
+	for _, it := range items {
+		if HasGenre(it.Categories, genre) {
+			out = append(out, it)
+		}
+	}
+	return out
+}
 
 func Filter(items []RankedItem, disliked map[string]struct{}) []RankedItem {
 	seen := make(map[string]struct{}, len(items))
@@ -32,6 +69,8 @@ func RankedFromCandidates(cands []Candidate) []RankedItem {
 			RankerScore:    c.RetrievalScore,
 			Title:          c.Title,
 			Categories:     c.Categories,
+			Year:           c.Year,
+			Popularity:     c.Popularity,
 		})
 	}
 	return out
@@ -71,6 +110,17 @@ func DislikedSet(feats *UserFeatures) map[string]struct{} {
 	return out
 }
 
+func ExcludeSet(feats *UserFeatures) map[string]struct{} {
+	out := DislikedSet(feats)
+	if feats == nil {
+		return out
+	}
+	for _, id := range feats.LikedItems {
+		out[id] = struct{}{}
+	}
+	return out
+}
+
 func ToItems(ranked []RankedItem, limit int, useRanker bool) []Item {
 	if limit <= 0 || limit > len(ranked) {
 		if limit <= 0 {
@@ -88,9 +138,11 @@ func ToItems(ranked []RankedItem, limit int, useRanker bool) []Item {
 			Score:          r.RetrievalScore,
 			Title:          r.Title,
 			Categories:     r.Categories,
+			Year:           r.Year,
 			Source:         r.Source,
 			RetrievalScore: r.RetrievalScore,
 			SourceRank:     r.SourceRank,
+			Popularity:     r.Popularity,
 		}
 		if useRanker {
 			s := r.RankerScore

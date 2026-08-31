@@ -32,13 +32,20 @@ func main() {
 	}
 	rdb := redis.NewClient(opt)
 	store := features.NewStore(rdb)
-	ml := clients.NewMLClient(cfg.MLBaseURL, 3*time.Second)
-	pub := events.NewKafkaPublisher(cfg.KafkaBrokers, cfg.KafkaTimeout)
+	ml := clients.NewMLClient(cfg.MLBaseURL, 8*time.Second)
+	var pub events.Publisher = events.NewKafkaPublisher(cfg.KafkaBrokers, cfg.KafkaTimeout)
+	if cfg.InlineFeatures {
+		pub = &events.BufferPublisher{}
+	}
 	defer pub.Close()
 
 	orch := recommendation.NewOrchestrator(cfg, store, ml, ml, pub, telemetry.Logger("recommendation-api"))
+	if cfg.InlineFeatures {
+		orch.Ingest = ml.IngestEvent
+	}
 	orch.FallbackCandidates = store.FallbackCandidates
 	srv := api.NewServer(cfg, orch, log)
+	srv.Catalog = ml
 	srv.Ready = func(ctx context.Context) error {
 		// Process is ready to serve degraded results even if Redis is down.
 		// Ready means the HTTP server can accept traffic.

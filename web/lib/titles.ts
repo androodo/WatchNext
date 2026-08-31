@@ -45,6 +45,16 @@ export function parseMovieTitle(raw: string | undefined | null): ParsedTitle {
   return { display: flipped, year, searchNames };
 }
 
+const GENRE_LABELS: Record<string, string> = {
+  childrens: "Family",
+  sci_fi: "Sci-fi",
+  film_noir: "Noir",
+};
+
 export function formatCategories(categories: string[] | undefined): string[] {
-  return (categories || []).map((c) => c.replaceAll("_", " "));
+  return (categories || []).map((raw) => {
+    const key = raw.trim().toLowerCase().replaceAll(" ", "_");
+    if (GENRE_LABELS[key]) return GENRE_LABELS[key];
+    return key.replaceAll("_", " ");
+  });
 }

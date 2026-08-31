@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any, Protocol
 
+from watchnext.catalog.browse import canonicalize_genres
 from watchnext.common.constants import DEDUPE_TTL_SECONDS
 from watchnext.common.schema import InteractionEvent, parse_event
 from watchnext.features.engine import FeatureEngine, HistoryRecord, UserFeatureState
@@ -106,11 +107,39 @@ class FeatureProcessor:
             interacted_items=interacted,
             recent_actions=recent,
         )
-        cats = self.item_categories.get(str(event.item_id), [])
+        engine.seed_affinities_from_likes(self.item_categories)
+        cats = self._categories_for(event)
         state = engine.apply(event, cats, now=now)
         self.redis.set(user_features_key(event.user_id), json.dumps(state.to_dict()))
         self.redis.set(user_history_key(event.user_id), json.dumps(engine.export_history()))
         return state
+
+    def _categories_for(self, event: InteractionEvent) -> list[str]:
+        mapped = list(self.item_categories.get(str(event.item_id), []) or [])
+        if mapped:
+            return mapped
+        raw = (event.metadata or {}).get("categories") or []
+        if isinstance(raw, str):
+            raw = [part.strip() for part in raw.split(",") if part.strip()]
+        return canonicalize_genres(raw)
+
+    def backfill_user_affinities(self, features_key: str) -> bool:
+        raw = self.redis.get(features_key)
+        if not raw:
+            return False
+        data = json.loads(raw)
+        if data.get("affinities"):
+            return False
+        liked = [str(i) for i in (data.get("liked_items") or [])]
+        if not liked:
+            return False
+        engine = FeatureEngine(liked_items=liked)
+        engine.seed_affinities_from_likes(self.item_categories)
+        if not engine._affinities:
+            return False
+        data["affinities"] = {k: round(v, 6) for k, v in sorted(engine._affinities.items())}
+        self.redis.set(features_key, json.dumps(data))
+        return True
 
 
 class MemoryRedis:

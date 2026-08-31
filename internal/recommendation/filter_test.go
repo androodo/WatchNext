@@ -15,6 +15,33 @@ func TestFilterRemovesDuplicatesAndDislikes(t *testing.T) {
 	}
 }
 
+func TestFilterByGenreKeepsMatchingTitles(t *testing.T) {
+	items := []RankedItem{
+		{ItemID: "1", Categories: []string{"comedy"}},
+		{ItemID: "2", Categories: []string{"sci_fi", "action"}},
+	}
+	out := FilterByGenre(items, "Sci-Fi")
+	if len(out) != 1 || out[0].ItemID != "2" {
+		t.Fatalf("got %+v", out)
+	}
+}
+
+func TestExcludeSetDropsLikedAndSkipped(t *testing.T) {
+	items := []RankedItem{
+		{ItemID: "liked"},
+		{ItemID: "skip"},
+		{ItemID: "fresh"},
+	}
+	feats := &UserFeatures{
+		LikedItems:    []string{"liked"},
+		DislikedItems: []string{"skip"},
+	}
+	out := Filter(items, ExcludeSet(feats))
+	if len(out) != 1 || out[0].ItemID != "fresh" {
+		t.Fatalf("got %+v", out)
+	}
+}
+
 func TestAffinityOverlayPrefersMatchingCategory(t *testing.T) {
 	items := []RankedItem{
 		{ItemID: "comedy", RankerScore: 0.50, Categories: []string{"comedy"}},

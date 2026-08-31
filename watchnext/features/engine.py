@@ -137,6 +137,20 @@ class FeatureEngine:
             recent_actions=state.recent_actions,
         )
 
+    def seed_affinities_from_likes(self, item_categories: dict[str, list[str]]) -> None:
+        """Fill empty affinities from already-liked titles once their genres are known."""
+        if self._affinities or not self._liked:
+            return
+        from watchnext.common.constants import EVENT_WEIGHTS
+
+        weight = EVENT_WEIGHTS["like"]
+        for item_id in self._liked:
+            for cat in item_categories.get(str(item_id), []) or []:
+                prev = self._affinities.get(cat, 0.0)
+                self._affinities[cat] = (1.0 - self.alpha) * prev + self.alpha * weight
+        if self._affinities:
+            self._clip_affinities()
+
     def apply(
         self,
         event: InteractionEvent,

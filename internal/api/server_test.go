@@ -23,7 +23,7 @@ func (stubStore) GetUser(ctx context.Context, userID string) (*recommendation.Us
 
 type stubCands struct{}
 
-func (stubCands) Candidates(ctx context.Context, userID, requestID string, k int, exclude []string) ([]recommendation.Candidate, error) {
+func (stubCands) Candidates(ctx context.Context, userID, requestID string, k int, exclude []string, genre string, affinities map[string]float64) ([]recommendation.Candidate, error) {
 	return []recommendation.Candidate{{ItemID: "1", RetrievalScore: 0.5, Source: "popularity"}}, nil
 }
 
@@ -90,6 +90,54 @@ func TestEventPublishFailureIsNotSuccess(t *testing.T) {
 	s.Handler().ServeHTTP(rr, req)
 	if rr.Code != http.StatusServiceUnavailable {
 		t.Fatalf("expected 503, got %d %s", rr.Code, rr.Body.String())
+	}
+}
+
+type stubCatalog struct{}
+
+func (stubCatalog) Catalog(ctx context.Context, q, genre, sort string, limit, offset, yearMin, yearMax int) (*recommendation.CatalogPage, error) {
+	return &recommendation.CatalogPage{
+		Items: []recommendation.CatalogItem{{ItemID: "1", Title: "Fargo (1996)", Categories: []string{"crime"}}},
+		Total: 1, Limit: limit, Offset: offset, Query: q, Genre: genre, Sort: sort,
+	}, nil
+}
+
+func (stubCatalog) Genres(ctx context.Context) (*recommendation.GenreCatalog, error) {
+	return &recommendation.GenreCatalog{Genres: []recommendation.GenreCount{{Name: "crime", Count: 1}}, TotalItems: 3883}, nil
+}
+
+func (stubCatalog) RefreshCatalog(ctx context.Context) (*recommendation.GenreCatalog, error) {
+	return stubCatalog{}.Genres(ctx)
+}
+
+func (stubCatalog) Item(ctx context.Context, itemID string) (*recommendation.CatalogItem, error) {
+	return &recommendation.CatalogItem{ItemID: itemID, Title: "Fargo (1996)", Categories: []string{"crime"}, Rating: 4.1}, nil
+}
+
+func TestCatalogAndGenres(t *testing.T) {
+	s := testServer(&events.BufferPublisher{})
+	s.Catalog = stubCatalog{}
+	rr := httptest.NewRecorder()
+	s.Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/v1/catalog?q=fargo&genre=crime", nil))
+	if rr.Code != 200 {
+		t.Fatalf("catalog %d %s", rr.Code, rr.Body.String())
+	}
+	rr = httptest.NewRecorder()
+	s.Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/v1/genres", nil))
+	if rr.Code != 200 {
+		t.Fatalf("genres %d %s", rr.Code, rr.Body.String())
+	}
+	var body map[string]any
+	if err := json.Unmarshal(rr.Body.Bytes(), &body); err != nil {
+		t.Fatal(err)
+	}
+	if body["total_items"] != float64(3883) {
+		t.Fatalf("total_items %v", body["total_items"])
+	}
+	rr = httptest.NewRecorder()
+	s.Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/v1/items/1", nil))
+	if rr.Code != 200 {
+		t.Fatalf("item %d %s", rr.Code, rr.Body.String())
 	}
 }
 

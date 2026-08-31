@@ -71,3 +71,11 @@ def test_liked_items_persist_and_skip_removes_them():
     )
     assert after.liked_items == []
     assert "10" in after.disliked_items
+
+
+def test_seed_affinities_from_existing_likes():
+    eng = FeatureEngine(liked_items=["tt1", "tt2"])
+    eng.seed_affinities_from_likes({"tt1": ["sci_fi"], "tt2": ["action"]})
+    snap = eng.snapshot(datetime(2020, 1, 1, tzinfo=UTC))
+    assert snap.affinity("sci_fi") > 0
+    assert snap.affinity("action") > 0

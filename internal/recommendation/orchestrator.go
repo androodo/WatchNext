@@ -19,7 +19,7 @@ import (
 )
 
 type CandidateSource interface {
-	Candidates(ctx context.Context, userID, requestID string, k int, exclude []string) ([]Candidate, error)
+	Candidates(ctx context.Context, userID, requestID string, k int, exclude []string, genre string, affinities map[string]float64) ([]Candidate, error)
 }
 
 type Ranker interface {
@@ -36,6 +36,7 @@ type Orchestrator struct {
 	Cands              CandidateSource
 	Ranker             Ranker
 	Pub                events.Publisher
+	Ingest             func(context.Context, []byte) error
 	Log                *slog.Logger
 	Now                func() time.Time
 	IDGen              func() string
@@ -61,12 +62,12 @@ func newRequestID() string {
 	return hex.EncodeToString(b)
 }
 
-func (o *Orchestrator) Recommend(ctx context.Context, userID string, limit int, debug bool) (*Result, error) {
+func (o *Orchestrator) Recommend(ctx context.Context, userID string, limit int, debug bool, genre string) (*Result, error) {
 	if limit <= 0 {
-		limit = 10
+		limit = 36
 	}
-	if limit > 50 {
-		limit = 50
+	if limit > 80 {
+		limit = 80
 	}
 	start := time.Now()
 	requestID := o.IDGen()
@@ -96,7 +97,7 @@ func (o *Orchestrator) Recommend(ctx context.Context, userID string, limit int, 
 	}
 	result.UserFeatures = feats
 
-	cands, candErr := o.lookupCandidates(ctx, userID, requestID, feats)
+	cands, candErr := o.lookupCandidates(ctx, userID, requestID, feats, limit, genre)
 	if candErr != nil || len(cands) == 0 {
 		o.fallback(result, "candidate_service_unavailable")
 		if o.FallbackCandidates != nil {
@@ -136,10 +137,11 @@ func (o *Orchestrator) Recommend(ctx context.Context, userID string, limit int, 
 		go o.shadow(context.WithoutCancel(ctx), userID, requestID, cands, feats, ranked, limit)
 	}
 
-	ranked = ApplyAffinityOverlay(ranked, feats, 0.35)
+	ranked = ApplyAffinityOverlay(ranked, feats, 0.5)
 
 	_, fspan := telemetry.Tracer().Start(ctx, "filter")
-	filtered := Filter(ranked, DislikedSet(feats))
+	filtered := Filter(ranked, ExcludeSet(feats))
+	filtered = FilterByGenre(filtered, genre)
 	fspan.End()
 
 	result.Recommendations = ToItems(filtered, limit, useRanker && !result.FallbackUsed)
@@ -183,7 +185,7 @@ func (o *Orchestrator) lookupFeatures(ctx context.Context, userID string) (*User
 	return feats, err
 }
 
-func (o *Orchestrator) lookupCandidates(ctx context.Context, userID, requestID string, feats *UserFeatures) ([]Candidate, error) {
+func (o *Orchestrator) lookupCandidates(ctx context.Context, userID, requestID string, feats *UserFeatures, limit int, genre string) ([]Candidate, error) {
 	cctx, cancel := context.WithTimeout(ctx, o.Cfg.CandidateTimeout)
 	defer cancel()
 	t0 := time.Now()
@@ -192,8 +194,23 @@ func (o *Orchestrator) lookupCandidates(ctx context.Context, userID, requestID s
 	exclude := []string{}
 	if feats != nil {
 		exclude = append(exclude, feats.DislikedItems...)
+		exclude = append(exclude, feats.LikedItems...)
 	}
-	cands, err := o.Cands.Candidates(cctx, userID, requestID, 100, exclude)
+	k := 120
+	if limit > 20 {
+		k = limit * 5
+	}
+	if k > 250 {
+		k = 250
+	}
+	if genre != "" {
+		k = 250
+	}
+	var affinities map[string]float64
+	if feats != nil {
+		affinities = feats.Affinities
+	}
+	cands, err := o.Cands.Candidates(cctx, userID, requestID, k, exclude, genre, affinities)
 	telemetry.CandidateLatency.Observe(time.Since(t0).Seconds())
 	return cands, err
 }
@@ -273,6 +290,16 @@ func (o *Orchestrator) PublishEvent(ctx context.Context, ev events.Event) error 
 	payload, err := events.Marshal(ev)
 	if err != nil {
 		return err
+	}
+	if o.Ingest != nil {
+		pctx, cancel := context.WithTimeout(ctx, 8*time.Second)
+		defer cancel()
+		if err := o.Ingest(pctx, payload); err != nil {
+			telemetry.EventsPublished.WithLabelValues("inline", "error").Inc()
+			return err
+		}
+		telemetry.EventsPublished.WithLabelValues("inline", "ok").Inc()
+		return nil
 	}
 	pctx, cancel := context.WithTimeout(ctx, o.Cfg.KafkaTimeout)
 	defer cancel()

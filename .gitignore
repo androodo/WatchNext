@@ -1,12 +1,21 @@
-# Data (never commit MovieLens)
+# Data (never commit MovieLens dumps)
 data/raw/
-data/processed/
-!data/raw/.gitkeep
+data/processed/*
 !data/processed/.gitkeep
+!data/processed/items.parquet
+!data/processed/item_categories.json
+!data/processed/imdb_movies.parquet
+!data/processed/imdb_movies.json
 
-# Model artifacts (large)
-artifacts/
+# Model artifacts — keep the trained demo models in git so Render can build
+artifacts/*
 !artifacts/.gitkeep
+!artifacts/als.npz
+!artifacts/als.json
+!artifacts/popularity.parquet
+!artifacts/ranker-v1.txt
+!artifacts/ranker-v1.json
+!artifacts/training_summary.json
 
 # Python
 .venv/

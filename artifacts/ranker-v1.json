@@ -1,0 +1,29 @@
+{
+  "feature_names": [
+    "retrieval_score",
+    "source_rank",
+    "source_is_als",
+    "source_is_popularity",
+    "user_interaction_count",
+    "user_views_24h",
+    "user_likes_24h",
+    "user_skips_24h",
+    "user_watches_24h",
+    "user_activity_7d",
+    "user_avg_engagement",
+    "item_popularity",
+    "item_avg_rating",
+    "item_rating_count",
+    "item_like_rate",
+    "user_item_affinity",
+    "genre_match_count",
+    "previously_interacted",
+    "hour_of_day",
+    "day_of_week",
+    "item_year_norm"
+  ],
+  "model_version": "ranker-v1",
+  "n_rows": 131640,
+  "n_groups": 26328,
+  "n_users_sampled": 800
+}

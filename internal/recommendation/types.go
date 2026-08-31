@@ -36,6 +36,8 @@ type Candidate struct {
 	SourceRank     int      `json:"source_rank"`
 	Title          string   `json:"title,omitempty"`
 	Categories     []string `json:"categories,omitempty"`
+	Year           *int     `json:"year,omitempty"`
+	Popularity     float64  `json:"popularity,omitempty"`
 }
 
 type RankedItem struct {
@@ -46,6 +48,42 @@ type RankedItem struct {
 	RankerScore    float64  `json:"ranker_score"`
 	Title          string   `json:"title,omitempty"`
 	Categories     []string `json:"categories,omitempty"`
+	Year           *int     `json:"year,omitempty"`
+	Popularity     float64  `json:"popularity,omitempty"`
+}
+
+type CatalogItem struct {
+	ItemID     string   `json:"item_id"`
+	Title      string   `json:"title,omitempty"`
+	Categories []string `json:"categories,omitempty"`
+	Year       *int     `json:"year,omitempty"`
+	Popularity float64  `json:"popularity,omitempty"`
+	Rating     float64  `json:"rating,omitempty"`
+	Source     string   `json:"source,omitempty"`
+}
+
+type CatalogPage struct {
+	Items  []CatalogItem `json:"items"`
+	Total  int           `json:"total"`
+	Offset int           `json:"offset"`
+	Limit  int           `json:"limit"`
+	Query  string        `json:"query"`
+	Genre  string        `json:"genre"`
+	Sort   string        `json:"sort"`
+}
+
+type GenreCount struct {
+	Name  string `json:"name"`
+	Count int    `json:"count"`
+}
+
+type GenreCatalog struct {
+	Genres     []GenreCount `json:"genres"`
+	TotalItems int          `json:"total_items"`
+	LiveItems  int          `json:"live_items,omitempty"`
+	YearMin    *int         `json:"year_min,omitempty"`
+	YearMax    *int         `json:"year_max,omitempty"`
+	UpdatedAt  string       `json:"updated_at,omitempty"`
 }
 
 type Item struct {
@@ -53,10 +91,12 @@ type Item struct {
 	Score          float64  `json:"score"`
 	Title          string   `json:"title,omitempty"`
 	Categories     []string `json:"categories,omitempty"`
+	Year           *int     `json:"year,omitempty"`
 	Source         string   `json:"source,omitempty"`
 	RetrievalScore float64  `json:"retrieval_score,omitempty"`
 	RankerScore    *float64 `json:"ranker_score,omitempty"`
 	SourceRank     int      `json:"source_rank,omitempty"`
+	Popularity     float64  `json:"popularity,omitempty"`
 }
 
 type Result struct {

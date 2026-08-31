@@ -3,7 +3,7 @@
 Two stages, kept separate on purpose.
 
 ```
-catalog → candidate generation (~100) → ranker → filter → top 10
+catalog (MovieLens + IMDb) → candidate generation → ranker → recency / genre → top 36
 ```
 
 ## Candidates
@@ -35,4 +35,8 @@ Unknown users skip ALS and receive popularity. Unseen items can still appear via
 
 ## Filtering
 
-After ranking: drop duplicate `item_id`, drop `disliked_items` from the user feature blob. Filtering is not folded into the model score.
+After ranking: drop duplicate `item_id`, drop `disliked_items` from the user feature blob. An optional `genre` query keeps only matching categories and backfills from the full catalog so a comedy bill is not stuck at three hits. Filtering is not folded into the model score.
+
+## Catalog
+
+`GET /v1/catalog?q=&genre=&sort=popular|year|title&limit=&offset=` pages the whole item table. `GET /v1/genres` returns category counts. MovieLens 1M stops in 2000; IMDb’s public dump (refreshed with `POST /v1/catalog/refresh`) adds later titles. ALS still personalizes the overlap with MovieLens. New titles are mixed in by popularity, recency, and genre affinity.

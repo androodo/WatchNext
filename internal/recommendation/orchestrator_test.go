@@ -26,7 +26,7 @@ type memCands struct {
 	err   error
 }
 
-func (m memCands) Candidates(ctx context.Context, userID, requestID string, k int, exclude []string) ([]Candidate, error) {
+func (m memCands) Candidates(ctx context.Context, userID, requestID string, k int, exclude []string, genre string, affinities map[string]float64) ([]Candidate, error) {
 	if ctx.Err() != nil {
 		return nil, ctx.Err()
 	}
@@ -77,7 +77,7 @@ func TestRecommendTreatmentUsesRanker(t *testing.T) {
 	pub := &events.BufferPublisher{}
 	orch := NewOrchestrator(testCfg(), memStore{feats: &UserFeatures{}}, memCands{cands: []Candidate{{ItemID: "sci", RetrievalScore: 0.1}}}, ranker, pub, slog.Default())
 	orch.IDGen = func() string { return "req-1" }
-	res, err := orch.Recommend(context.Background(), user, 10, false)
+	res, err := orch.Recommend(context.Background(), user, 10, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,7 +104,7 @@ func TestRankerFailureFallsBack(t *testing.T) {
 	}
 	ranker := &memRanker{err: errors.New("down")}
 	orch := NewOrchestrator(testCfg(), memStore{feats: &UserFeatures{}}, memCands{cands: []Candidate{{ItemID: "p", RetrievalScore: 0.7, Source: "popularity"}}}, ranker, &events.BufferPublisher{}, slog.Default())
-	res, err := orch.Recommend(context.Background(), user, 5, false)
+	res, err := orch.Recommend(context.Background(), user, 5, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -118,7 +118,7 @@ func TestRankerFailureFallsBack(t *testing.T) {
 
 func TestRedisFailureStillServes(t *testing.T) {
 	orch := NewOrchestrator(testCfg(), memStore{err: errors.New("redis")}, memCands{cands: []Candidate{{ItemID: "pop", RetrievalScore: 1}}}, &memRanker{items: []RankedItem{{ItemID: "pop", RankerScore: 1}}}, &events.BufferPublisher{}, slog.Default())
-	res, err := orch.Recommend(context.Background(), "cold-user-x", 3, false)
+	res, err := orch.Recommend(context.Background(), "cold-user-x", 3, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -132,7 +132,7 @@ func TestCandidateFailureUsesPopularityFallback(t *testing.T) {
 	orch.FallbackCandidates = func(ctx context.Context, k int) []Candidate {
 		return []Candidate{{ItemID: "cached-pop", RetrievalScore: 1, Source: "popularity_fallback"}}
 	}
-	res, err := orch.Recommend(context.Background(), "u1", 10, false)
+	res, err := orch.Recommend(context.Background(), "u1", 10, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -152,7 +152,7 @@ func TestContextCancellation(t *testing.T) {
 	// Store/cands see a derived timeout context, not the already-canceled parent
 	// after WithTimeout. Explicit canceled ctx on Recommend should still complete
 	// via fallbacks rather than hang.
-	res, err := orch.Recommend(ctx, "u", 10, false)
+	res, err := orch.Recommend(ctx, "u", 10, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}

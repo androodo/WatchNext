@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: watch-next-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: INLINE_FEATURES
+        value: "true"
+      - key: SHADOW_ENABLED
+        value: "false"

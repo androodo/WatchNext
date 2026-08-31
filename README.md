@@ -2,11 +2,12 @@
 
 What to watch next, from the movies you just liked or skipped. Likes and skips stream through Kafka-compatible Redpanda, update online features in Redis, and immediately change the next ranking from a two-stage retrieval + ranker.
 
-**UI:** [http://localhost:3000](http://localhost:3000) · **API:** `GET /v1/recommendations/{user_id}`
+**UI:** [http://localhost:3000](http://localhost:3000) · **Browse:** [http://localhost:3000/browse](http://localhost:3000/browse) · **API:** `GET /v1/recommendations/{user_id}`
 
 ## Features
 
-- **Two-stage ranking** — ALS + popularity retrieve ~100 candidates; LightGBM LambdaMART re-ranks on ~21 features (retrieval score, user windows, item stats, category affinity)
+- **Two-stage ranking** — ALS + popularity retrieve candidates; LightGBM LambdaMART re-ranks on ~21 features (retrieval score, user windows, item stats, category affinity)
+- **Full catalog** — MovieLens 1M plus IMDb’s daily dump, so the house runs through the current year. Browse, search, and filter by genre. Refresh titles from Booth.
 - **Live feedback loop** — like / skip events update Redis user features before the next request
 - **Training–serving parity** — the same `FeatureEngine` runs offline and online
 - **A/B experiments** — stable hash assignment; impressions carry `experiment` and `model_version`
@@ -36,7 +37,7 @@ flowchart LR
 2. Load online features from Redis.
 3. Retrieve candidates (ALS + popularity).
 4. Rank with LightGBM (treatment) or retrieval order (control).
-5. Filter duplicates and disliked items; return top 10.
+5. Filter duplicates, skips, and optional genre; return a longer bill (default 36).
 6. Publish the impression; later likes/skips flow:
 
 ```
@@ -82,6 +83,16 @@ python scripts/demo_realtime_personalization.py 1001
 ```
 
 Makefile: `setup`, `download-data`, `prepare-data`, `train`, `evaluate`, `up`, `down`, `test`, `lint`, `demo`, `benchmark`.
+
+## Live demo (Render + Vercel)
+
+The UI is a free **Vercel** Next.js app. The API is a free **Render** Docker web service (Go + Python ranker + Redis). Render’s free tier **spins down after 15 minutes of idle**, so the first click after that can take about a minute.
+
+1. Push this repo to GitHub, then on [render.com](https://render.com) create a **Web Service** from the repo: Docker, **Free**, health check `/health`. Copy the `onrender.com` URL.
+2. On [vercel.com](https://vercel.com) import the same repo, set **Root Directory** to `web`, and add `NEXT_PUBLIC_API_URL` = that Render URL (no trailing slash). Redeploy after saving the env var.
+3. Put the Vercel URL in the GitHub repo **About → Website**.
+
+The hosted API skips Kafka (`INLINE_FEATURES=true`) so likes still update Redis on one small VM. 512 MB RAM is tight; if the service OOMs, check Render logs.
 
 ## Repository
 

@@ -29,3 +29,35 @@ def test_invalid_payload_is_rejected():
     proc = FeatureProcessor(MemoryRedis(), item_categories={})
     result = proc.process_payload({"user_id": "1"})
     assert result.status == "invalid"
+
+
+def test_live_title_uses_metadata_categories():
+    proc = FeatureProcessor(MemoryRedis(), item_categories={})
+    ev = new_event(
+        "guest",
+        "tt3581920",
+        "like",
+        timestamp=datetime.now(UTC),
+        event_id="live-1",
+        metadata={"title": "The Odyssey (2026)", "categories": ["adventure", "fantasy"]},
+    )
+    result = proc.process_event(ev)
+    assert result.status == "applied"
+    assert result.state is not None
+    assert result.state.affinity("adventure") > 0
+    assert result.state.affinity("fantasy") > 0
+
+
+def test_empty_affinities_seed_from_liked_catalog():
+    redis = MemoryRedis()
+    proc = FeatureProcessor(redis, item_categories={"tt1": ["sci_fi"], "tt2": ["action"]})
+    redis.set(
+        "user:guest:features",
+        '{"liked_items": ["tt1", "tt2"], "affinities": {}, "recent_actions": []}',
+    )
+    assert proc.backfill_user_affinities("user:guest:features") is True
+    import json
+
+    stored = json.loads(redis.get("user:guest:features") or "{}")
+    assert stored["affinities"]["sci_fi"] > 0
+    assert stored["affinities"]["action"] > 0
